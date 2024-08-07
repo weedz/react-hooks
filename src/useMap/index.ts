@@ -7,6 +7,7 @@ export function useMap<K, T>() {
     const state = useMemo(
         () => ({
             has: (key: K) => map.has(key),
+            get: (key: K) => map.get(key),
             set: (key: K, value: T) => {
                 map.set(key, value);
                 setState((current) => !current);
