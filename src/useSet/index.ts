@@ -4,7 +4,7 @@ export function useSet<T>() {
     const set = useMemo(() => new Set<T>(), []);
     const [, setState] = useState(false);
 
-    const state = useMemo(() => ({
+    return {
         has: (value: T) => set.has(value),
         add: (value: T) => {
             set.add(value);
@@ -15,8 +15,6 @@ export function useSet<T>() {
             return set.delete(value);
         },
         values: () => set.values(),
-    }), [set]);
-
-    return state;
+    };
 }
 
