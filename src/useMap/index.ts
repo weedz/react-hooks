@@ -1,21 +1,23 @@
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-export function useMap<K, T>() {
-    const map = useMemo(() => new Map<K, T>(), []);
-    const [, setState] = useState(false);
+export function useMap<K, T>(initialValue?: Array<[K, T]>) {
+    const map = useRef(new Map<K, T>(initialValue));
+    const [s, setState] = useState(false);
 
-    return {
-        has: (key: K) => map.has(key),
-        get: (key: K) => map.get(key),
-        set: (key: K, value: T) => {
-            map.set(key, value);
+    useEffect(() => {
+        map.current.set = (...args) => {
             setState((current) => !current);
-        },
-        delete: (key: K) => {
+            return Map.prototype.set.apply(map.current, args);
+        };
+        map.current.delete = (key: K) => {
             setState((current) => !current);
-            return map.delete(key);
-        },
-        values: () => map.values(),
-        keys: () => map.keys(),
-    };
+            return Map.prototype.delete.apply(map.current, [key]);
+        };
+        map.current.clear = () => {
+            setState((current) => !current);
+            Map.prototype.clear.apply(map.current);
+        };
+    }, []);
+
+    return { map: map.current, mapUpdated: s };
 }

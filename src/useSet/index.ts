@@ -1,20 +1,25 @@
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-export function useSet<T>() {
-    const set = useMemo(() => new Set<T>(), []);
-    const [, setState] = useState(false);
+export function useSet<T>(initialValue?: T[]) {
+    const set = useRef(new Set<T>(initialValue));
+    const [s, setState] = useState(false);
 
-    return {
-        has: (value: T) => set.has(value),
-        add: (value: T) => {
-            set.add(value);
+    useEffect(() => {
+        set.current.add = (value: T) => {
             setState((current) => !current);
-        },
-        delete: (value: T) => {
+            return Set.prototype.add.apply(set.current, [value]);
+        };
+        set.current.delete = (value: T) => {
             setState((current) => !current);
-            return set.delete(value);
-        },
-        values: () => set.values(),
-    };
+            return Set.prototype.delete.apply(set.current, [value]);
+        };
+        set.current.clear = () => {
+            setState((current) => !current);
+            Set.prototype.clear.apply(set.current);
+        };
+
+    }, []);
+
+    return { set: set.current, setUpdated: s };
 }
 
